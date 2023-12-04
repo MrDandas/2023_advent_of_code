@@ -1,6 +1,9 @@
+from functools import reduce
+
 from util.part_enum import Part
 
-SPECIAL_CHARS = "!\"#$%&\'()*+,-/:;<=>?@[\\]^_`{|}~"
+PART_1_SPECIAL_CHARS = "!\"#$%&\'()*+,-/:;<=>?@[\\]^_`{|}~"
+PART_2_SPECIAL_CHAR = '*'
 SCAN_AREA = (1, 1)
 
 
@@ -10,7 +13,9 @@ class GearRatios(object):
     """
 
     @staticmethod
-    def parse_input(*, input_lines: list[str]) -> tuple[(int, int, int, int), (int, int)]:
+    def parse_input(*, input_lines: list[str], part: Part) -> tuple[(int, int, int, int), (int, int)]:
+
+        special_character_lookup_list = PART_1_SPECIAL_CHARS if part == Part.ONE else PART_2_SPECIAL_CHAR
 
         numbers = []  # (row, l_idx, r_idx, value)
         special_characters = []  # (row, idx)
@@ -41,7 +46,7 @@ class GearRatios(object):
                         l_idx, r_idx = -1, -1
 
                     # if we hit special char, mark its position
-                    if input_lines[i][j] in SPECIAL_CHARS:
+                    if input_lines[i][j] in special_character_lookup_list:
                         special_characters.append((i, j))
 
         return numbers, special_characters
@@ -75,10 +80,11 @@ class GearRatios(object):
            . . . . . . .
         """
 
-        numbers, special_characters = GearRatios.parse_input(input_lines=lines)
-        numbers_near_special_chars = set()
-        phase_1_sum = 0
+        numbers, special_characters = GearRatios.parse_input(input_lines=lines, part=part)
+        part_1_numbers_near_special_chars = set()
+        part_2_numbers_near_special_chars = {}
         for sc in special_characters:
+            part_2_numbers_near_special_chars[sc] = []
 
             # calculate row/line distances
             row_limits = (max(0, sc[0] - SCAN_AREA[0]), min(len(lines), sc[0] + SCAN_AREA[0]))
@@ -97,23 +103,30 @@ class GearRatios(object):
                 case_3 = n[1] <= line_limits[0] and n[2] >= line_limits[1]
 
                 if row_fit and (case_1 or case_2 or case_3):
-                    numbers_near_special_chars.add(n)
+                    part_1_numbers_near_special_chars.add(n)
+                    part_2_numbers_near_special_chars[sc].append(n)
 
-        phase_1_sum = sum([x[3] for x in numbers_near_special_chars])
         print(f'Numbers: {numbers}')
         print(f'Special Characters: {special_characters}')
-        print(f'Part 1 Sum: {phase_1_sum}')
 
         if part == Part.ONE:
-            return numbers, special_characters, phase_1_sum
+            part_1_sum = sum([x[3] for x in part_1_numbers_near_special_chars])
+            print(f'Part 1 Sum: {part_1_sum}')
+            return numbers, special_characters, part_1_sum
 
+        if part == Part.TWO:
+            part_2_sum = 0
+            for _,v in part_2_numbers_near_special_chars.items():
+                if len(v) == 2:
+                    part_2_sum += int(v[0][3]) * int(v[1][3])
+
+            print(f'Part 2 Sum: {part_2_sum}')
+            return numbers, special_characters, part_2_sum
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     with open('input.txt') as file:
         input_lines = file.readlines()
-
-        game_bag = {'red': 12, 'green': 13, 'blue': 14}
 
         print(f'Solution Part.ONE: {GearRatios.solve(input_lines, part=Part.ONE)}')
         print(f'Solution Part.TWO: {GearRatios.solve(input_lines, part=Part.TWO)}')

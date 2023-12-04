@@ -1,9 +1,4 @@
-from enum import Enum
-
-
-class Part(Enum):
-    ONE = 1
-    TWO = 2
+from util.part_enum import Part
 
 
 class Trebouchet(object):

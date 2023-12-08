@@ -35,9 +35,15 @@ class WaitForIt(object):
 
         return total
 
+    @staticmethod
+    def solve_part_2(lines: list[str]):
+        race_time=int(''.join([s for s in lines[0].split() if s.isdigit()]))
+        race_record=int(''.join([s for s in lines[1].split() if s.isdigit()]))
+        return WaitForIt.solve_part_1_impl(race_time, race_record)
 
 if __name__ == '__main__':
     with open('input.txt') as file:
         input_lines = file.readlines()
 
         print(f'Solution Part.ONE: {WaitForIt.solve_part_1(input_lines)}')
+        print(f'Solution Part.TWO: {WaitForIt.solve_part_2(input_lines)}')

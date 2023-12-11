@@ -1,31 +1,10 @@
 import functools
 import re
 from enum import Enum
-from functools import total_ordering
+from timeit import default_timer
 
 
-@total_ordering
-class OrderedEnum(Enum):
-    def __eq__(self, other):
-        if isinstance(other, Label):
-            return self.value == other.value
-
-        return NotImplemented
-
-    def __gt__(self, other):
-        if isinstance(other, Label):
-            return self.value > other.value
-
-        return NotImplemented
-
-    def __lt__(self, other):
-        if isinstance(other, Label):
-            return self.value < other
-
-        return NotImplemented
-
-
-class Label(OrderedEnum):
+class Label(Enum):
     HIGH_CARD = 1  # 5 groups
     ONE_PAIR = 2  # 2 groups
     TWO_PAIRS = 3  # 3 groups
@@ -33,6 +12,7 @@ class Label(OrderedEnum):
     FULL_HOUSE = 5  # 2 groups
     FOUR_OF_A_KIND = 6  # 2 groups
     FIVE_OF_A_KIND = 7  # 1 group
+
 
 CARDS = {
     '2': 2,
@@ -49,27 +29,6 @@ CARDS = {
     'K': 13,
     'A': 14,
 }
-
-
-class Card(OrderedEnum):
-    TWO = '2'
-    THREE = '3'
-    FOUR = '4'
-    FIVE = '5'
-    SIX = '6'
-    SEVEN = '7'
-    EIGHT = '8'
-    NINE = '9'
-    TEN = 'T', 10
-    JACK = 'J', 11
-    QUEEN = 'Q', 12
-    KING = 'K', 13
-    ACE = 'A', 14
-
-    def __init__(self, rep, val=None):
-        self.rep = rep
-        self.val = val if val is not None else int(rep)
-
 
 HAND_SIZE = 5
 
@@ -89,7 +48,6 @@ class CamelCards(object):
                     return CARDS[left_card] - CARDS[right_card]
         else:
             return diff
-
 
     @staticmethod
     def find_labels(hand: str):
@@ -126,7 +84,6 @@ class CamelCards(object):
 
         return label
 
-
     @staticmethod
     def solve_part_1(lines: list[str]):
         hands = [
@@ -140,14 +97,16 @@ class CamelCards(object):
 
         res = 0
         for i in range(0, len(sorted_hands)):
-            print(sorted_hands[i])
+            # print(sorted_hands[i])
             res += sorted_hands[i][2] * (len(sorted_hands) - i)
 
         return res
+
 
 if __name__ == '__main__':
     with open('input.txt') as file:
         input_lines = file.readlines()
 
-        print(f'Solution Part.ONE: {CamelCards.solve_part_1(input_lines)}')
-        # print(f'Solution Part.TWO: {CamelCards.solve_part_2(input_lines)}')
+        start = default_timer()
+        solution_1 = CamelCards.solve_part_1(input_lines)
+        print(f'Solution Part.ONE: {solution_1}; took: {default_timer() - start}')

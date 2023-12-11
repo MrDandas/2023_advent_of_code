@@ -1,6 +1,5 @@
 import unittest
 from camel_cards import Label
-from camel_cards import Card
 from camel_cards import CamelCards
 from camel_cards import CARDS
 

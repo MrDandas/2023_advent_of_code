@@ -14,7 +14,18 @@ class Label(Enum):
     FIVE_OF_A_KIND = 7  # 1 group
 
 
+UPGRADES = {
+    Label.HIGH_CARD: Label.ONE_PAIR,
+    Label.ONE_PAIR: Label.THREE_OF_A_KIND,
+    Label.TWO_PAIRS: Label.FULL_HOUSE,
+    Label.THREE_OF_A_KIND: Label.FOUR_OF_A_KIND,
+    Label.FULL_HOUSE: Label.FOUR_OF_A_KIND,
+    Label.FOUR_OF_A_KIND: Label.FIVE_OF_A_KIND,
+    Label.FIVE_OF_A_KIND: Label.FIVE_OF_A_KIND
+}
+
 CARDS = {
+    'J': 1,
     '2': 2,
     '3': 3,
     '4': 4,
@@ -24,10 +35,9 @@ CARDS = {
     '8': 8,
     '9': 9,
     'T': 10,
-    'J': 11,
-    'Q': 12,
-    'K': 13,
-    'A': 14,
+    'Q': 11,
+    'K': 12,
+    'A': 13,
 }
 
 HAND_SIZE = 5
@@ -50,7 +60,7 @@ class CamelCards(object):
             return diff
 
     @staticmethod
-    def find_labels(hand: str):
+    def find_labels(hand: str, upgrade: bool = False):
         sorted_hand = ''.join(sorted(hand))
 
         groups = [m.group(0) for m in re.finditer(r"(\w)\1*", sorted_hand)]
@@ -63,6 +73,7 @@ class CamelCards(object):
         # FOUR_OF_A_KIND = 6    # 2 groups (4,1)
         # FIVE_OF_A_KIND = 7    # 1 group  (5)
         label = None
+
         if len(groups) == 1:
             label = Label.FIVE_OF_A_KIND
         elif len(groups) == 2:
@@ -80,24 +91,52 @@ class CamelCards(object):
         elif len(groups) == 5:
             label = Label.HIGH_CARD
 
-        # print(f'{hand} -> {groups} -> {label}')
+        print_str = f'{hand} -> {groups} -> {label}'
+        if upgrade:
+            # there are special cases when JJ(JJJ respectively) form another PAIR/TRIPLE
+            # -> JJ X Y Z   ->  XXXX Y  :   THREE_OF_A_KIND
+            # -> JJ XX Y    ->  XXXX Y  :   FOUR_OF_A_KIND
+            # -> JJ XXX     ->  XXXXX   :   FIVE_OF_A_KIND
+            # -> JJJ X Y    ->  XXXX Y  :   FOUR_OF_A_KIND
+            # -> JJJ XX     ->  XXXXX   :   FIVE_OF_A_KIND
+
+            j_count = len([i for i, letter in enumerate(sorted_hand) if letter == 'J'])
+            orig_label = label
+
+            if j_count == 1 or j_count == 4 or j_count == 5:
+                label = UPGRADES[label]
+            elif j_count == 2:
+                if len(groups) == 4:
+                    label = Label.THREE_OF_A_KIND
+                if len(groups) == 3:
+                    label = Label.FOUR_OF_A_KIND
+                if len(groups) == 2:
+                    label = Label.FIVE_OF_A_KIND
+            elif j_count == 3:
+                if len(groups) == 3:
+                    label = Label.FOUR_OF_A_KIND
+                if len(groups) == 2:
+                    label = Label.FIVE_OF_A_KIND
+
+            print_str = f'{hand} -> {groups} -> {label} (original: {orig_label})'
+
+        #print(print_str)
 
         return label
 
     @staticmethod
-    def solve_part_1(lines: list[str]):
+    def solve(lines: list[str], upgrade_joker: bool = False):
         hands = [
             # (original_hand, label, bet)
         ]
         for line in lines:
             line_split = line.split()
-            hands.append((line_split[0], CamelCards.find_labels(line_split[0]), int(line_split[1])))
+            hands.append((line_split[0], CamelCards.find_labels(line_split[0], upgrade_joker), int(line_split[1])))
 
         sorted_hands = sorted(hands, key=functools.cmp_to_key(CamelCards.compare_hands), reverse=True)
 
         res = 0
         for i in range(0, len(sorted_hands)):
-            # print(sorted_hands[i])
             res += sorted_hands[i][2] * (len(sorted_hands) - i)
 
         return res
@@ -108,5 +147,5 @@ if __name__ == '__main__':
         input_lines = file.readlines()
 
         start = default_timer()
-        solution_1 = CamelCards.solve_part_1(input_lines)
-        print(f'Solution Part.ONE: {solution_1}; took: {default_timer() - start}')
+        print(f'Solution PART1: {CamelCards.solve(input_lines)}; took: {default_timer() - start}')
+        print(f'Solution PART2: {CamelCards.solve(input_lines, upgrade_joker=True)}; took: {default_timer() - start}')

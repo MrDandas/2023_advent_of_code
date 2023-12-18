@@ -1,6 +1,8 @@
+import math
 import re
 from timeit import default_timer
 from collections.abc import Callable
+from math import lcm
 
 
 class HauntedWasteland(object):
@@ -52,9 +54,9 @@ class HauntedWasteland(object):
 
         start_to_cycle = {}
         for s in all_starts:
-            start_to_cycle[s] = HauntedWasteland.walk(directions, steps, 'AAA', is_end)
+            start_to_cycle[s] = HauntedWasteland.walk(directions, steps, s, is_end)
 
-        return 42
+        return math.lcm(*start_to_cycle.values())
 
 
 if __name__ == '__main__':
@@ -62,5 +64,5 @@ if __name__ == '__main__':
         input_lines = file.readlines()
         start = default_timer()
 
-        print(f'Solution PART1: {HauntedWasteland.solve(input_lines)}; took: {default_timer() - start} ms')
-        # print(f'Solution PART1: {HauntedWasteland.solve_2(input_lines)}; took: {default_timer() - start} ms')
+        print(f'Solution PART 1: {HauntedWasteland.solve(input_lines)}; took: {default_timer() - start} ms')
+        print(f'Solution PART 2: {HauntedWasteland.solve_2(input_lines)}; took: {default_timer() - start} ms')

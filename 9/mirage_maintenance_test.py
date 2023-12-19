@@ -34,7 +34,7 @@ class MirageMaintenanceTest(unittest.TestCase):
     def test_part_2(self):
         content = \
             """ \
-0 3 6 9 12 15\
+10  13  16  21  30  45\
             """
 
         print(f'+++ Testing [{self.__class__}]: +++')

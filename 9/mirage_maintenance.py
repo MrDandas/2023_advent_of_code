@@ -36,8 +36,18 @@ class MirageMaintenance(object):
         return grand_sum
 
     @staticmethod
-    def solve_2(series: list[int]):
-        pass
+    def solve_2(series: list[list[int]]):
+        grand_sum = 0
+        for i in range(0, len(series)):
+            accumulator = [series[i]]
+            MirageMaintenance.find_reducts(series[i], accumulator)
+
+            part_sum = 0
+            for j in range(0, len(accumulator)):
+                part_sum = accumulator[len(accumulator) - j - 1][0] - part_sum
+            grand_sum += part_sum
+
+        return grand_sum
 
 
 if __name__ == '__main__':
